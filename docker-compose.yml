@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=${postgresql+asyncpg://neondb_owner:npg_J4NLhdzDUR0y@ep-little-fire-ai388bx3-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require}
+      - COHERE_API_KEY=${rVeF2debFAmua57XdTRkj1JXWDl7l5D4euXHzU0d}
+      - BETTER_AUTH_SECRET=${YbYzhFCNlBWV2VUlOp9kzH16ornY4kiF}
+      - SECRET_KEY=${uG4GOZ-kL2sN6ULOMSIZV_NKHx3KAW1LFffSSy5IjrY}
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: todoapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
